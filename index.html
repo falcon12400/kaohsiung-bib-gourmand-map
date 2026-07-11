@@ -39,7 +39,14 @@
     <!-- Main Content -->
     <main id="app-main">
         <!-- Sidebar -->
-        <aside id="sidebar">
+        <aside id="sidebar" class="sheet-collapsed">
+            <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-expanded="false" aria-controls="sidebar">
+                <span class="sidebar-toggle-handle"></span>
+                <span class="sidebar-toggle-label">列表</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
             <div class="sidebar-header">
                 <div class="sidebar-tabs" id="sidebar-tabs">
                     <button type="button" class="sidebar-tab active" data-tab="list">列表</button>
@@ -99,6 +106,12 @@
                     <circle cx="12" cy="12" r="8"></circle>
                 </svg>
                 <span>定位我</span>
+            </button>
+            <button type="button" class="legend-toggle-btn" id="legend-toggle-btn" aria-expanded="false" aria-controls="map-legend">
+                <span>圖例</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
             </button>
             <div class="map-overlay-legend" id="map-legend">
                 <!-- Legend will be injected here -->

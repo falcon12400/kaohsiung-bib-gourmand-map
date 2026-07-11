@@ -39,6 +39,15 @@
   const detailPanel = document.getElementById('detail-panel');
   const detailContent = document.getElementById('detail-content');
   const detailClose = document.getElementById('detail-close');
+  const sidebarEl = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const legendToggleBtn = document.getElementById('legend-toggle-btn');
+
+  const BIB_TYPE = TYPE_ORDER[0];
+  const ATTRACTION_TYPE = TYPE_ORDER[1];
+  const BIB_CATEGORIES = new Set(CATEGORY_ORDER[BIB_TYPE] || []);
+  let isMobileSheetExpanded = false;
+  let isLegendExpanded = false;
 
   // ── Init ───────────────────────────────
   function init() {
@@ -50,6 +59,7 @@
     renderMarkers(restaurants);
     renderList(restaurants);
     renderLegend(restaurants);
+    syncResponsiveUi();
     bindEvents();
     updatePillCounts();
   }
@@ -176,6 +186,14 @@
     }));
   }
 
+  function getMarkerColor(item, items = restaurants) {
+    if (useTypeLevelIcons(items)) {
+      return TYPE_CONFIG[item.type]?.color || '#888';
+    }
+
+    return CATEGORY_COLORS[item.category] || TYPE_CONFIG[item.type]?.color || '#888';
+  }
+
   function renderPills() {
     const orderedCategories = getOrderedCategories();
     pillsEl.innerHTML = [
@@ -200,6 +218,56 @@
         </div>
       `).join('')}
     `;
+  }
+
+  function setMobileSheetExpanded(expanded) {
+    isMobileSheetExpanded = expanded;
+    if (!sidebarEl || !sidebarToggle) return;
+
+    sidebarEl.classList.toggle('sheet-expanded', expanded);
+    sidebarEl.classList.toggle('sheet-collapsed', !expanded);
+    sidebarToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  }
+
+  function toggleMobileSheet(forceExpanded) {
+    const expanded = typeof forceExpanded === 'boolean'
+      ? forceExpanded
+      : !isMobileSheetExpanded;
+
+    setMobileSheetExpanded(expanded);
+
+    if (window.innerWidth <= 768) {
+      setTimeout(() => map.invalidateSize(), 320);
+    }
+  }
+
+  function setLegendExpanded(expanded) {
+    isLegendExpanded = expanded;
+    if (!mapLegendEl || !legendToggleBtn) return;
+
+    mapLegendEl.classList.toggle('is-expanded', expanded);
+    mapLegendEl.classList.toggle('is-collapsed', !expanded);
+    legendToggleBtn.classList.toggle('is-active', expanded);
+    legendToggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  }
+
+  function toggleLegend(forceExpanded) {
+    const expanded = typeof forceExpanded === 'boolean'
+      ? forceExpanded
+      : !isLegendExpanded;
+    setLegendExpanded(expanded);
+  }
+
+  function syncResponsiveUi() {
+    if (window.innerWidth <= 768) {
+      setMobileSheetExpanded(false);
+      setLegendExpanded(false);
+      return;
+    }
+
+    sidebarEl?.classList.remove('sheet-expanded', 'sheet-collapsed');
+    sidebarToggle?.setAttribute('aria-expanded', 'true');
+    setLegendExpanded(true);
   }
 
   function renderFilterGroup(container, options) {
@@ -288,11 +356,11 @@
 
   // ── Create custom marker icon ──────────
   function createMarkerIcon(restaurant, items) {
-    const cat = restaurant.category;
     const emoji = getItemIcon(restaurant, items);
+    const color = getMarkerColor(restaurant, items);
 
     const html = `
-      <div class="custom-marker cat-${cat}" data-id="${restaurant.id}">
+      <div class="custom-marker" data-id="${restaurant.id}" style="background: ${color};">
         <span class="marker-emoji">${emoji}</span>
       </div>
     `;
@@ -532,7 +600,7 @@
 
         items.forEach(r => {
           html += `
-              <div class="restaurant-card" data-id="${r.id}" data-category="${r.category}" style="animation-delay: ${cardIndex * 0.03}s">
+              <div class="restaurant-card" data-id="${r.id}" data-category="${r.category}" data-type="${r.type}" style="animation-delay: ${cardIndex * 0.03}s">
                 <div class="card-top">
                   <span class="card-name">${r.name}</span>
                   ${r.isNew ? '<span class="card-badge-new">✦ NEW</span>' : ''}
@@ -657,6 +725,9 @@
     if (!marker) return;
 
     const latLng = marker.getLatLng();
+    if (window.innerWidth <= 768) {
+      setMobileSheetExpanded(false);
+    }
     map.flyTo(latLng, 15, { duration: 0.8 });
 
     setTimeout(() => {
@@ -791,6 +862,10 @@
     closeDetailPanel();
     updatePillCounts();
     renderFilterControls();
+
+    if (window.innerWidth <= 768) {
+      setTimeout(() => map.invalidateSize(), 320);
+    }
   }
 
   function updatePillCounts() {
@@ -853,6 +928,9 @@
     showBibBtn.addEventListener('click', () => showOnlyType('必比登美食'));
     locateMeBtn.addEventListener('click', locateUser);
 
+    sidebarToggle?.addEventListener('click', () => toggleMobileSheet());
+    legendToggleBtn?.addEventListener('click', () => toggleLegend());
+
     // Search
     let searchTimeout;
     searchInput.addEventListener('input', () => {
@@ -872,6 +950,7 @@
 
     // Handle window resize for layout changes
     window.addEventListener('resize', () => {
+      syncResponsiveUi();
       map.invalidateSize();
     });
   }
