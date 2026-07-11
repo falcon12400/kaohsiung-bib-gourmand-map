@@ -267,6 +267,98 @@ body {
   gap: 8px;
 }
 
+/* --- Group Sections --- */
+.group-section {
+  margin-bottom: 4px;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.group-header:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+.group-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.group-emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.group-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.group-count {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.group-chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  transition: transform var(--transition-smooth);
+  flex-shrink: 0;
+}
+
+.group-header.collapsed .group-chevron {
+  transform: rotate(-90deg);
+}
+
+/* Group body collapse/expand */
+.group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 6px;
+  max-height: 2000px;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              padding-top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.25s ease;
+  opacity: 1;
+}
+
+.group-body.collapsed {
+  max-height: 0;
+  padding-top: 0;
+  opacity: 0;
+}
+
 /* --- Restaurant Card --- */
 .restaurant-card {
   padding: 16px;

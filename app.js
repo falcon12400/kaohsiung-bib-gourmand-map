@@ -10,6 +10,7 @@
   let activeCategory = 'all';
   let activeRestaurantId = null;
   let markerGroup;
+  const groupCollapsedState = {};  // track collapsed groups by category name
 
   // ── DOM refs ───────────────────────────
   const listEl = document.getElementById('restaurant-list');
@@ -110,7 +111,7 @@
     });
   }
 
-  // ── Render List ────────────────────────
+  // ── Render List (grouped by category) ──
   function renderList(restaurants) {
     if (restaurants.length === 0) {
       listEl.innerHTML = `
@@ -125,21 +126,75 @@
 
     countEl.textContent = restaurants.length;
 
-    listEl.innerHTML = restaurants.map((r, i) => `
-      <div class="restaurant-card" data-id="${r.id}" data-category="${r.category}" style="animation-delay: ${i * 0.03}s">
-        <div class="card-top">
-          <span class="card-name">${r.name}</span>
-          ${r.isNew ? '<span class="card-badge-new">✦ NEW</span>' : ''}
+    // Group restaurants by category, preserving order
+    const categoryOrder = ['台菜合菜', '小吃', '其他料理'];
+    const grouped = {};
+    categoryOrder.forEach(cat => { grouped[cat] = []; });
+    restaurants.forEach(r => {
+      if (!grouped[r.category]) grouped[r.category] = [];
+      grouped[r.category].push(r);
+    });
+
+    let html = '';
+    let cardIndex = 0;
+
+    categoryOrder.forEach(cat => {
+      const items = grouped[cat];
+      if (!items || items.length === 0) return;
+
+      const isCollapsed = groupCollapsedState[cat] === true;
+      const color = CATEGORY_COLORS[cat] || '#888';
+      const emoji = CATEGORY_ICONS[cat] || '📍';
+
+      html += `
+        <div class="group-section" data-group="${cat}">
+          <div class="group-header${isCollapsed ? ' collapsed' : ''}" data-group="${cat}">
+            <div class="group-header-left">
+              <span class="group-color-dot" style="background: ${color};"></span>
+              <span class="group-emoji">${emoji}</span>
+              <span class="group-title">${cat}</span>
+              <span class="group-count">${items.length}</span>
+            </div>
+            <svg class="group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="group-body${isCollapsed ? ' collapsed' : ''}">
+      `;
+
+      items.forEach(r => {
+        html += `
+            <div class="restaurant-card" data-id="${r.id}" data-category="${r.category}" style="animation-delay: ${cardIndex * 0.03}s">
+              <div class="card-top">
+                <span class="card-name">${r.name}</span>
+                ${r.isNew ? '<span class="card-badge-new">✦ NEW</span>' : ''}
+              </div>
+              <div class="card-address">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>${r.address}</span>
+              </div>
+            </div>
+        `;
+        cardIndex++;
+      });
+
+      html += `
+          </div>
         </div>
-        <span class="card-category cat-${r.category}">${CATEGORY_ICONS[r.category]} ${r.category}</span>
-        <div class="card-address">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-          </svg>
-          <span>${r.address}</span>
-        </div>
-      </div>
-    `).join('');
+      `;
+    });
+
+    listEl.innerHTML = html;
+
+    // Bind group header clicks
+    listEl.querySelectorAll('.group-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const cat = header.dataset.group;
+        toggleGroup(cat);
+      });
+    });
 
     // Bind card clicks
     listEl.querySelectorAll('.restaurant-card').forEach(card => {
@@ -149,6 +204,24 @@
         flyToMarker(id);
       });
     });
+  }
+
+  // ── Toggle Group ───────────────────────
+  function toggleGroup(category) {
+    groupCollapsedState[category] = !groupCollapsedState[category];
+    const section = listEl.querySelector(`.group-section[data-group="${category}"]`);
+    if (!section) return;
+
+    const header = section.querySelector('.group-header');
+    const body = section.querySelector('.group-body');
+
+    if (groupCollapsedState[category]) {
+      header.classList.add('collapsed');
+      body.classList.add('collapsed');
+    } else {
+      header.classList.remove('collapsed');
+      body.classList.remove('collapsed');
+    }
   }
 
   // ── Set Active Restaurant ──────────────
