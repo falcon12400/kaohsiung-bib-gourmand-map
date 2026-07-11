@@ -342,6 +342,143 @@ const RESTAURANTS = [
     price: "$",
     isNew: false,
     tags: ["蒸餃", "北方麵食"]
+  },
+
+  // ===== 景點 =====
+  {
+    id: 101,
+    type: "景點",
+    name: "國立科學工藝博物館",
+    category: "室內景點",
+    facets: ["景點", "室內景點", "親子", "雨天備案"],
+    address: "高雄市三民區九如一路720號",
+    district: "三民區",
+    lat: 22.6397,
+    lng: 120.3226,
+    description: "高雄最穩定的室內親子備案之一，展覽量體完整，適合抵達高雄後直接安排半天到一天。",
+    price: "$$",
+    isNew: false,
+    tags: ["博物館", "雨備", "親子"]
+  },
+  {
+    id: 102,
+    type: "景點",
+    name: "航空教育展示館",
+    category: "室內景點",
+    facets: ["景點", "室內景點", "親子", "交通主題"],
+    address: "高雄市岡山區致遠路55號",
+    district: "岡山區",
+    lat: 22.7964,
+    lng: 120.2950,
+    description: "以飛機與航空主題為核心的展示館，適合喜歡飛機、軍事或大型載具的小孩與大人。",
+    price: "$$",
+    isNew: false,
+    tags: ["飛機", "航空", "雨備"]
+  },
+  {
+    id: 103,
+    type: "景點",
+    name: "哈瑪星台灣鐵道館",
+    category: "室內景點",
+    facets: ["景點", "室內景點", "親子", "交通主題"],
+    address: "高雄市鼓山區蓬萊路99號B7、B8倉庫",
+    district: "鼓山區",
+    lat: 22.6167,
+    lng: 120.2777,
+    description: "位於駁二蓬萊倉庫，以大型鐵道模型與聲光展演呈現台灣鐵道歷史，適合接鹽埕與駁二行程。",
+    price: "$$",
+    isNew: false,
+    tags: ["鐵道", "模型", "駁二"]
+  },
+  {
+    id: 104,
+    type: "景點",
+    name: "蓮池潭兒童公園",
+    category: "親子景點",
+    facets: ["景點", "親子景點", "戶外景點", "親子"],
+    address: "高雄市左營區蓮潭路",
+    district: "左營區",
+    lat: 22.6841,
+    lng: 120.2905,
+    description: "左營親子放電代表點，可和蓮池潭、龍虎塔一帶一起安排，適合 6 歲到 9 歲小孩活動。",
+    price: "$",
+    isNew: false,
+    tags: ["公園", "放電", "左營"]
+  },
+  {
+    id: 105,
+    type: "景點",
+    name: "安坡童玩部落",
+    category: "山林部落",
+    facets: ["景點", "山林部落", "部落", "親子", "屏東外掛"],
+    address: "屏東縣三地門鄉高山巷1-3號",
+    district: "三地門鄉",
+    lat: 22.7815,
+    lng: 120.6598,
+    description: "排灣族童玩文化體驗部落，適合安排預約導覽、童玩 DIY、部落餐食與親子體驗。",
+    price: "$$",
+    isNew: false,
+    tags: ["排灣族", "童玩", "部落導覽"]
+  },
+  {
+    id: 106,
+    type: "景點",
+    name: "青葉部落",
+    category: "山林部落",
+    facets: ["景點", "山林部落", "部落", "藝術"],
+    address: "屏東縣三地門鄉沿山公路185線青葉部落",
+    district: "三地門鄉",
+    lat: 22.7342,
+    lng: 120.6547,
+    description: "以魯凱神話藝術村著稱，適合散步、看壁畫與搭配沿山線部落行程。",
+    price: "$",
+    isNew: false,
+    tags: ["魯凱族", "藝術村", "沿山線"]
+  },
+  {
+    id: 107,
+    type: "景點",
+    name: "禮納里部落",
+    category: "山林部落",
+    facets: ["景點", "山林部落", "部落", "散步", "親子"],
+    address: "屏東縣瑪家鄉和平路一段63號周邊",
+    district: "瑪家鄉",
+    lat: 22.6734,
+    lng: 120.6340,
+    description: "莫拉克風災後的重要新部落，適合慢走、拍照、族服體驗與部落工坊安排。",
+    price: "$",
+    isNew: false,
+    tags: ["部落散步", "族服", "工坊"]
+  },
+  {
+    id: 108,
+    type: "景點",
+    name: "多納部落",
+    category: "山林部落",
+    facets: ["景點", "山林部落", "部落", "魯凱文化"],
+    address: "高雄市茂林區多納里",
+    district: "茂林區",
+    lat: 22.9055,
+    lng: 120.7010,
+    description: "茂林區深處的魯凱部落，黑米、石板屋與吊橋是代表特色，適合獨立排半天到一天。",
+    price: "$",
+    isNew: false,
+    tags: ["魯凱族", "黑米", "石板屋"]
+  },
+  {
+    id: 109,
+    type: "景點",
+    name: "萬山部落",
+    category: "山林部落",
+    facets: ["景點", "山林部落", "部落", "魯凱文化"],
+    address: "高雄市茂林區萬山里",
+    district: "茂林區",
+    lat: 22.9100,
+    lng: 120.7310,
+    description: "以岩雕、石板屋與魯凱文化著稱，適合文化導覽與深度走讀型行程。",
+    price: "$",
+    isNew: false,
+    tags: ["岩雕", "魯凱族", "文化導覽"]
   }
 ];
 
@@ -349,27 +486,32 @@ const RESTAURANTS = [
 const CATEGORY_COLORS = {
   "台菜合菜": "#E74C3C",
   "小吃": "#F39C12",
-  "其他料理": "#2ECC71"
+  "其他料理": "#2ECC71",
+  "室內景點": "#5B8DEF",
+  "親子景點": "#9B59B6",
+  "山林部落": "#16A085"
 };
 
 // Category icon emoji
 const CATEGORY_ICONS = {
   "台菜合菜": "🍲",
   "小吃": "🥢",
-  "其他料理": "🍜"
+  "其他料理": "🍜",
+  "室內景點": "🏛️",
+  "親子景點": "🛝",
+  "山林部落": "⛰️"
 };
 
 // Top-level type configuration (for nested grouping)
 const TYPE_CONFIG = {
   "必比登美食": { emoji: "🍽️", color: "#f0c040", label: "必比登美食" },
-  // Future:
-  // "旅館": { emoji: "🏨", color: "#5b8def", label: "推薦旅館" },
-  // "景點": { emoji: "🏛️", color: "#2ecc71", label: "必遊景點" },
+  "景點": { emoji: "🗺️", color: "#5b8def", label: "景點" },
 };
 
-const TYPE_ORDER = ["必比登美食"]; // controls render order
+const TYPE_ORDER = ["必比登美食", "景點"]; // controls render order
 
 // Sub-category order within each type
 const CATEGORY_ORDER = {
   "必比登美食": ["台菜合菜", "小吃", "其他料理"],
+  "景點": ["室內景點", "親子景點", "山林部落"],
 };

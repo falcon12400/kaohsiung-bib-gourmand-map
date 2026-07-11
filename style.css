@@ -541,6 +541,9 @@ body {
 .restaurant-card[data-category="台菜合菜"]::before { background: var(--accent-red); }
 .restaurant-card[data-category="小吃"]::before { background: var(--accent-orange); }
 .restaurant-card[data-category="其他料理"]::before { background: var(--accent-green); }
+.restaurant-card[data-category="室內景點"]::before { background: var(--accent-blue); }
+.restaurant-card[data-category="親子景點"]::before { background: #9b59b6; }
+.restaurant-card[data-category="山林部落"]::before { background: #16a085; }
 
 .restaurant-card:hover {
   background: var(--bg-card-hover);
@@ -559,6 +562,12 @@ body {
 .restaurant-card[data-category="小吃"].active { box-shadow: var(--shadow-glow-orange); }
 .restaurant-card[data-category="其他料理"]:hover,
 .restaurant-card[data-category="其他料理"].active { box-shadow: var(--shadow-glow-green); }
+.restaurant-card[data-category="室內景點"]:hover,
+.restaurant-card[data-category="室內景點"].active { box-shadow: 0 0 20px rgba(91, 141, 239, 0.25); }
+.restaurant-card[data-category="親子景點"]:hover,
+.restaurant-card[data-category="親子景點"].active { box-shadow: 0 0 20px rgba(155, 89, 182, 0.25); }
+.restaurant-card[data-category="山林部落"]:hover,
+.restaurant-card[data-category="山林部落"].active { box-shadow: 0 0 20px rgba(22, 160, 133, 0.25); }
 
 .card-top {
   display: flex;
@@ -667,6 +676,9 @@ body {
 .custom-marker.cat-台菜合菜 { background: var(--accent-red); }
 .custom-marker.cat-小吃 { background: var(--accent-orange); }
 .custom-marker.cat-其他料理 { background: var(--accent-green); }
+.custom-marker.cat-室內景點 { background: var(--accent-blue); }
+.custom-marker.cat-親子景點 { background: #9b59b6; }
+.custom-marker.cat-山林部落 { background: #16a085; }
 
 .custom-marker .marker-emoji {
   transform: rotate(45deg);
@@ -869,6 +881,9 @@ body {
 .detail-category-badge.cat-台菜合菜 { background: rgba(231,76,60,0.15); color: #ff7b6b; }
 .detail-category-badge.cat-小吃 { background: rgba(243,156,18,0.15); color: #ffc048; }
 .detail-category-badge.cat-其他料理 { background: rgba(46,204,113,0.15); color: #5dda8f; }
+.detail-category-badge.cat-室內景點 { background: rgba(91,141,239,0.15); color: #8fb3ff; }
+.detail-category-badge.cat-親子景點 { background: rgba(155,89,182,0.15); color: #c995e0; }
+.detail-category-badge.cat-山林部落 { background: rgba(22,160,133,0.15); color: #4dd0b2; }
 
 .detail-name {
   font-size: 1.6rem;

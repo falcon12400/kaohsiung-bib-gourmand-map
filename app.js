@@ -23,6 +23,7 @@
   const searchInput = document.getElementById('search-input');
   const countEl = document.getElementById('results-count');
   const pillsEl = document.getElementById('filter-pills');
+  const mapLegendEl = document.getElementById('map-legend');
   const sidebarTabsEl = document.getElementById('sidebar-tabs');
   const sidebarPanelList = document.getElementById('sidebar-panel-list');
   const sidebarPanelFilters = document.getElementById('sidebar-panel-filters');
@@ -41,9 +42,11 @@
     restaurants = normalizeRestaurants(RESTAURANTS);
     filterOptions = buildFilterOptions(restaurants);
     initMap();
+    renderPills();
     renderFilterControls();
     renderMarkers(restaurants);
     renderList(restaurants);
+    renderLegend(restaurants);
     bindEvents();
     updatePillCounts();
   }
@@ -101,6 +104,59 @@
     renderFilterGroup(typeFilterList, filterOptions.filter(option => option.kind === 'type'));
     renderFilterGroup(categoryFilterList, filterOptions.filter(option => option.kind === 'category'));
     renderFilterGroup(facetFilterList, filterOptions.filter(option => option.kind === 'facet'));
+  }
+
+  function getOrderedCategories(items = restaurants) {
+    const categories = Array.from(new Set(items.map(item => item.category)));
+    const ordered = [];
+    const seen = new Set();
+
+    TYPE_ORDER.forEach(type => {
+      const typeOrder = CATEGORY_ORDER[type] || [];
+      typeOrder.forEach(category => {
+        if (categories.includes(category) && !seen.has(category)) {
+          ordered.push(category);
+          seen.add(category);
+        }
+      });
+    });
+
+    categories
+      .sort((a, b) => a.localeCompare(b, 'zh-Hant'))
+      .forEach(category => {
+        if (!seen.has(category)) {
+          ordered.push(category);
+          seen.add(category);
+        }
+      });
+
+    return ordered;
+  }
+
+  function renderPills() {
+    const orderedCategories = getOrderedCategories();
+    pillsEl.innerHTML = [
+      `<button class="pill${activeCategory === 'all' ? ' active' : ''}" data-category="all">全部 <span class="pill-count">${restaurants.length}</span></button>`,
+      ...orderedCategories.map(category => `
+        <button class="pill${activeCategory === category ? ' active' : ''}" data-category="${category}">
+          ${category}
+          <span class="pill-count">0</span>
+        </button>
+      `)
+    ].join('');
+  }
+
+  function renderLegend(items) {
+    const orderedCategories = getOrderedCategories(items);
+    mapLegendEl.innerHTML = `
+      <div class="legend-title">圖例</div>
+      ${orderedCategories.map(category => `
+        <div class="legend-item">
+          <span class="legend-dot" style="background: ${CATEGORY_COLORS[category] || '#888'};"></span>
+          ${category}
+        </div>
+      `).join('')}
+    `;
   }
 
   function renderFilterGroup(container, options) {
@@ -255,7 +311,7 @@
       listEl.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">🔍</div>
-          <div class="empty-state-text">找不到符合條件的餐廳<br>請嘗試其他搜尋條件</div>
+          <div class="empty-state-text">找不到符合條件的地點<br>請嘗試其他搜尋條件</div>
         </div>
       `;
       countEl.textContent = '0';
@@ -264,8 +320,8 @@
 
     countEl.textContent = restaurants.length;
 
-    // Group restaurants by category, preserving order
-    const categoryOrder = ['台菜合菜', '小吃', '其他料理'];
+    // Group entries by category
+    const categoryOrder = getOrderedCategories(restaurants);
     const grouped = {};
     categoryOrder.forEach(cat => { grouped[cat] = []; });
     restaurants.forEach(r => {
@@ -422,7 +478,7 @@
       <div class="detail-section-title">簡介</div>
       <p class="detail-desc">${r.description}</p>
 
-      <div class="detail-section-title">餐廳資訊</div>
+      <div class="detail-section-title">地點資訊</div>
       <div class="detail-info-row">
         <svg class="detail-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
@@ -520,6 +576,7 @@
     const filtered = getFilteredRestaurants();
     renderList(filtered);
     renderMarkers(filtered);
+    renderLegend(filtered);
 
     // Fit bounds if markers exist
     if (filtered.length > 0 && markerGroup.getLayers().length > 0) {
@@ -545,12 +602,10 @@
       );
     });
 
-    const counts = {
-      all: allCount.length,
-      '台菜合菜': allCount.filter(r => r.category === '台菜合菜').length,
-      '小吃': allCount.filter(r => r.category === '小吃').length,
-      '其他料理': allCount.filter(r => r.category === '其他料理').length
-    };
+    const counts = { all: allCount.length };
+    restaurants.forEach(item => {
+      counts[item.category] = (counts[item.category] || 0) + (allCount.includes(item) ? 1 : 0);
+    });
 
     pillsEl.querySelectorAll('.pill').forEach(pill => {
       const cat = pill.dataset.category;
