@@ -44,6 +44,10 @@
         <!-- Sidebar -->
         <aside id="sidebar">
             <div class="sidebar-header">
+                <div class="sidebar-tabs" id="sidebar-tabs">
+                    <button type="button" class="sidebar-tab active" data-tab="list">列表</button>
+                    <button type="button" class="sidebar-tab" data-tab="filters">篩選</button>
+                </div>
                 <div class="search-box">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
@@ -54,8 +58,33 @@
                     <span id="results-count">24</span> 間餐廳
                 </div>
             </div>
-            <div class="restaurant-list" id="restaurant-list">
-                <!-- Cards will be injected here -->
+            <div class="sidebar-body">
+                <div class="sidebar-panel active" id="sidebar-panel-list">
+                    <div class="restaurant-list" id="restaurant-list">
+                        <!-- Cards will be injected here -->
+                    </div>
+                </div>
+                <div class="sidebar-panel" id="sidebar-panel-filters">
+                    <div class="filter-panel">
+                        <div class="filter-action-row">
+                            <button type="button" class="filter-action-btn" id="show-all-btn">全部顯示</button>
+                            <button type="button" class="filter-action-btn" id="hide-all-btn">全部隱藏</button>
+                            <button type="button" class="filter-action-btn primary" id="show-bib-btn">只看必比登</button>
+                        </div>
+                        <section class="filter-section">
+                            <div class="filter-section-title">大類</div>
+                            <div class="filter-option-list" id="type-filter-list"></div>
+                        </section>
+                        <section class="filter-section">
+                            <div class="filter-section-title">分類</div>
+                            <div class="filter-option-list" id="category-filter-list"></div>
+                        </section>
+                        <section class="filter-section">
+                            <div class="filter-section-title">其他標籤</div>
+                            <div class="filter-option-list" id="facet-filter-list"></div>
+                        </section>
+                    </div>
+                </div>
             </div>
         </aside>
 

@@ -4,12 +4,18 @@
 (function () {
   'use strict';
 
+  const DEFAULT_TYPE = '必比登美食';
+
   // ── State ──────────────────────────────
   let map;
   let markers = {};
   let activeCategory = 'all';
   let activeRestaurantId = null;
+  let activeSidebarTab = 'list';
   let markerGroup;
+  let restaurants = [];
+  let filterOptions = [];
+  const hiddenFacets = new Set();
   const groupCollapsedState = {};  // track collapsed groups by category name
 
   // ── DOM refs ───────────────────────────
@@ -17,17 +23,149 @@
   const searchInput = document.getElementById('search-input');
   const countEl = document.getElementById('results-count');
   const pillsEl = document.getElementById('filter-pills');
+  const sidebarTabsEl = document.getElementById('sidebar-tabs');
+  const sidebarPanelList = document.getElementById('sidebar-panel-list');
+  const sidebarPanelFilters = document.getElementById('sidebar-panel-filters');
+  const typeFilterList = document.getElementById('type-filter-list');
+  const categoryFilterList = document.getElementById('category-filter-list');
+  const facetFilterList = document.getElementById('facet-filter-list');
+  const showAllBtn = document.getElementById('show-all-btn');
+  const hideAllBtn = document.getElementById('hide-all-btn');
+  const showBibBtn = document.getElementById('show-bib-btn');
   const detailPanel = document.getElementById('detail-panel');
   const detailContent = document.getElementById('detail-content');
   const detailClose = document.getElementById('detail-close');
 
   // ── Init ───────────────────────────────
   function init() {
+    restaurants = normalizeRestaurants(RESTAURANTS);
+    filterOptions = buildFilterOptions(restaurants);
     initMap();
-    renderMarkers(RESTAURANTS);
-    renderList(RESTAURANTS);
+    renderFilterControls();
+    renderMarkers(restaurants);
+    renderList(restaurants);
     bindEvents();
-    updatePillCounts(RESTAURANTS);
+    updatePillCounts();
+  }
+
+  function normalizeRestaurants(items) {
+    return items.map(item => {
+      const type = item.type || DEFAULT_TYPE;
+      const facets = Array.from(new Set([
+        type,
+        item.category,
+        ...(item.facets || [])
+      ].filter(Boolean)));
+
+      return {
+        ...item,
+        type,
+        facets
+      };
+    });
+  }
+
+  function buildFilterOptions(items) {
+    const options = new Map();
+
+    items.forEach(item => {
+      options.set(item.type, {
+        key: item.type,
+        kind: 'type',
+        label: item.type,
+        color: TYPE_CONFIG[item.type]?.color || '#5b8def'
+      });
+
+      options.set(item.category, {
+        key: item.category,
+        kind: 'category',
+        label: item.category,
+        color: CATEGORY_COLORS[item.category] || '#888'
+      });
+
+      item.facets.forEach(facet => {
+        if (facet === item.type || facet === item.category) return;
+        options.set(facet, {
+          key: facet,
+          kind: 'facet',
+          label: facet,
+          color: '#7f8c8d'
+        });
+      });
+    });
+
+    return Array.from(options.values()).sort((a, b) => a.label.localeCompare(b.label, 'zh-Hant'));
+  }
+
+  function renderFilterControls() {
+    renderFilterGroup(typeFilterList, filterOptions.filter(option => option.kind === 'type'));
+    renderFilterGroup(categoryFilterList, filterOptions.filter(option => option.kind === 'category'));
+    renderFilterGroup(facetFilterList, filterOptions.filter(option => option.kind === 'facet'));
+  }
+
+  function renderFilterGroup(container, options) {
+    if (!container) return;
+
+    if (options.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-text">目前沒有可用項目</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = options.map(option => {
+      const isHidden = hiddenFacets.has(option.key);
+      const count = restaurants.filter(item => item.facets.includes(option.key)).length;
+      return `
+        <button type="button" class="filter-option${isHidden ? ' is-hidden' : ''}" data-facet="${option.key}">
+          <div class="filter-option-left">
+            <span class="filter-option-dot" style="background:${option.color};"></span>
+            <span class="filter-option-label">${option.label}</span>
+          </div>
+          <span class="filter-option-meta">${isHidden ? '已隱藏' : `顯示中 · ${count}`}</span>
+        </button>
+      `;
+    }).join('');
+  }
+
+  function setSidebarTab(tabName) {
+    activeSidebarTab = tabName;
+    sidebarTabsEl.querySelectorAll('.sidebar-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.tab === tabName);
+    });
+    sidebarPanelList.classList.toggle('active', tabName === 'list');
+    sidebarPanelFilters.classList.toggle('active', tabName === 'filters');
+  }
+
+  function toggleFacet(facet) {
+    if (hiddenFacets.has(facet)) {
+      hiddenFacets.delete(facet);
+    } else {
+      hiddenFacets.add(facet);
+    }
+    applyFilter();
+  }
+
+  function showAllFacets() {
+    if (hiddenFacets.size === 0) return;
+    hiddenFacets.clear();
+    applyFilter();
+  }
+
+  function hideAllFacets() {
+    hiddenFacets.clear();
+    filterOptions.forEach(option => hiddenFacets.add(option.key));
+    applyFilter();
+  }
+
+  function showOnlyType(typeKey) {
+    hiddenFacets.clear();
+    filterOptions
+      .filter(option => option.kind === 'type' && option.key !== typeKey)
+      .forEach(option => hiddenFacets.add(option.key));
+    applyFilter();
   }
 
   // ── Map Init ───────────────────────────
@@ -267,7 +405,7 @@
 
   // ── Show Detail Panel ──────────────────
   function showDetailPanel(id) {
-    const r = RESTAURANTS.find(x => x.id === id);
+    const r = restaurants.find(x => x.id === id);
     if (!r) return;
 
     const catColor = CATEGORY_COLORS[r.category] || '#888';
@@ -301,6 +439,15 @@
         <div>
           <div class="detail-info-label">行政區</div>
           <div class="detail-info-value">${r.district}</div>
+        </div>
+      </div>
+      <div class="detail-info-row">
+        <svg class="detail-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3l7 4v10l-7 4-7-4V7l7-4z"/><path d="M12 22V12"/><path d="m19 7-7 5-7-5"/>
+        </svg>
+        <div>
+          <div class="detail-info-label">類型</div>
+          <div class="detail-info-value">${r.type}</div>
         </div>
       </div>
       <div class="detail-info-row">
@@ -356,15 +503,16 @@
   function getFilteredRestaurants() {
     const query = searchInput.value.trim().toLowerCase();
 
-    return RESTAURANTS.filter(r => {
+    return restaurants.filter(r => {
       const matchCategory = activeCategory === 'all' || r.category === activeCategory;
+      const matchHiddenFacets = !r.facets.some(facet => hiddenFacets.has(facet));
       const matchSearch = !query ||
         r.name.toLowerCase().includes(query) ||
         r.address.toLowerCase().includes(query) ||
         r.district.toLowerCase().includes(query) ||
         r.tags.some(t => t.toLowerCase().includes(query));
 
-      return matchCategory && matchSearch;
+      return matchCategory && matchHiddenFacets && matchSearch;
     });
   }
 
@@ -379,17 +527,22 @@
     }
 
     closeDetailPanel();
-    updatePillCounts(filtered);
+    updatePillCounts();
+    renderFilterControls();
   }
 
   function updatePillCounts() {
-    const allCount = RESTAURANTS.filter(r => {
+    const allCount = restaurants.filter(r => {
       const query = searchInput.value.trim().toLowerCase();
-      return !query ||
+      const matchHiddenFacets = !r.facets.some(facet => hiddenFacets.has(facet));
+
+      return matchHiddenFacets && (
+        !query ||
         r.name.toLowerCase().includes(query) ||
         r.address.toLowerCase().includes(query) ||
         r.district.toLowerCase().includes(query) ||
-        r.tags.some(t => t.toLowerCase().includes(query));
+        r.tags.some(t => t.toLowerCase().includes(query))
+      );
     });
 
     const counts = {
@@ -420,6 +573,24 @@
       activeCategory = pill.dataset.category;
       applyFilter();
     });
+
+    sidebarTabsEl.addEventListener('click', e => {
+      const tab = e.target.closest('.sidebar-tab');
+      if (!tab) return;
+      setSidebarTab(tab.dataset.tab);
+    });
+
+    [typeFilterList, categoryFilterList, facetFilterList].forEach(container => {
+      container.addEventListener('click', e => {
+        const option = e.target.closest('.filter-option');
+        if (!option) return;
+        toggleFacet(option.dataset.facet);
+      });
+    });
+
+    showAllBtn.addEventListener('click', showAllFacets);
+    hideAllBtn.addEventListener('click', hideAllFacets);
+    showBibBtn.addEventListener('click', () => showOnlyType('必比登美食'));
 
     // Search
     let searchTimeout;

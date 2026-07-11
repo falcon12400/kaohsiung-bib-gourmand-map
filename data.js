@@ -1,11 +1,21 @@
 /**
  * 2025 高雄必比登推介餐廳資料
  * 座標已根據地址對應至 Google Maps 實際位置
+ *
+ * 可擴充欄位說明：
+ * - type: 大類，例如「必比登美食」、「景點」
+ * - category: 清單分組，例如「小吃」、「室內景點」
+ * - facets: 額外可隱藏標籤，例如 ["景點", "室內景點", "親子"]
+ *
+ * 篩選規則：
+ * - 上方 pills 是快速聚焦某個 category
+ * - 側邊「隱藏類別」會依 facets / type / category 把資料整批隱藏
  */
 const RESTAURANTS = [
   // ===== 台菜合菜 =====
   {
     id: 1,
+    type: "必比登美食",
     name: "老新台菜",
     category: "台菜合菜",
     address: "高雄市三民區九如二路227號",
@@ -347,4 +357,19 @@ const CATEGORY_ICONS = {
   "台菜合菜": "🍲",
   "小吃": "🥢",
   "其他料理": "🍜"
+};
+
+// Top-level type configuration (for nested grouping)
+const TYPE_CONFIG = {
+  "必比登美食": { emoji: "🍽️", color: "#f0c040", label: "必比登美食" },
+  // Future:
+  // "旅館": { emoji: "🏨", color: "#5b8def", label: "推薦旅館" },
+  // "景點": { emoji: "🏛️", color: "#2ecc71", label: "必遊景點" },
+};
+
+const TYPE_ORDER = ["必比登美食"]; // controls render order
+
+// Sub-category order within each type
+const CATEGORY_ORDER = {
+  "必比登美食": ["台菜合菜", "小吃", "其他料理"],
 };
