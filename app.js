@@ -136,6 +136,46 @@
     return ordered;
   }
 
+  function getVisibleTypes(items = restaurants) {
+    const types = Array.from(new Set(items.map(item => item.type)));
+    const ordered = TYPE_ORDER.filter(type => types.includes(type));
+    const remaining = types
+      .filter(type => !TYPE_ORDER.includes(type))
+      .sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+
+    return ordered.concat(remaining);
+  }
+
+  function useTypeLevelIcons(items = restaurants) {
+    return getVisibleTypes(items).length > 1;
+  }
+
+  function getItemIcon(item, items = restaurants) {
+    if (useTypeLevelIcons(items)) {
+      return TYPE_CONFIG[item.type]?.emoji || '📍';
+    }
+
+    return CATEGORY_ICONS[item.category] || '📍';
+  }
+
+  function getLegendEntries(items = restaurants) {
+    if (useTypeLevelIcons(items)) {
+      return getVisibleTypes(items).map(type => ({
+        key: type,
+        label: type,
+        color: TYPE_CONFIG[type]?.color || '#888',
+        emoji: TYPE_CONFIG[type]?.emoji || '📍'
+      }));
+    }
+
+    return getOrderedCategories(items).map(category => ({
+      key: category,
+      label: category,
+      color: CATEGORY_COLORS[category] || '#888',
+      emoji: CATEGORY_ICONS[category] || '📍'
+    }));
+  }
+
   function renderPills() {
     const orderedCategories = getOrderedCategories();
     pillsEl.innerHTML = [
@@ -150,13 +190,13 @@
   }
 
   function renderLegend(items) {
-    const orderedCategories = getOrderedCategories(items);
+    const legendEntries = getLegendEntries(items);
     mapLegendEl.innerHTML = `
       <div class="legend-title">圖例</div>
-      ${orderedCategories.map(category => `
+      ${legendEntries.map(entry => `
         <div class="legend-item">
-          <span class="legend-dot" style="background: ${CATEGORY_COLORS[category] || '#888'};"></span>
-          ${category}
+          <span class="legend-dot" style="background: ${entry.color};"></span>
+          <span>${entry.emoji} ${entry.label}</span>
         </div>
       `).join('')}
     `;
@@ -247,9 +287,9 @@
   }
 
   // ── Create custom marker icon ──────────
-  function createMarkerIcon(restaurant) {
+  function createMarkerIcon(restaurant, items) {
     const cat = restaurant.category;
-    const emoji = CATEGORY_ICONS[cat] || '📍';
+    const emoji = getItemIcon(restaurant, items);
 
     const html = `
       <div class="custom-marker cat-${cat}" data-id="${restaurant.id}">
@@ -361,7 +401,7 @@
     markers = {};
 
     restaurants.forEach(r => {
-      const icon = createMarkerIcon(r);
+      const icon = createMarkerIcon(r, restaurants);
       const marker = L.marker([r.lat, r.lng], { icon: icon })
         .addTo(markerGroup);
 
