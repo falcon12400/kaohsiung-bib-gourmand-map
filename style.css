@@ -46,6 +46,7 @@
 
   --sidebar-width: 420px;
   --header-height: 72px;
+  --app-header-offset: 72px;
 
   --font-sans: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1339,9 +1340,9 @@ body {
   /* Mobile Layout: map on top, list on bottom */
   #app-main {
     flex-direction: column;
-    height: calc(100vh - 110px);
-    height: calc(100dvh - 110px);
-    margin-top: 110px;
+    height: calc(100vh - var(--app-header-offset));
+    height: calc(100dvh - var(--app-header-offset));
+    margin-top: var(--app-header-offset);
   }
 
   #sidebar {

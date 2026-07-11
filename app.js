@@ -42,6 +42,7 @@
   const sidebarEl = document.getElementById('sidebar');
   const sidebarToggle = document.getElementById('sidebar-toggle');
   const legendToggleBtn = document.getElementById('legend-toggle-btn');
+  const appHeader = document.getElementById('app-header');
 
   const BIB_TYPE = TYPE_ORDER[0];
   const ATTRACTION_TYPE = TYPE_ORDER[1];
@@ -258,7 +259,14 @@
     setLegendExpanded(expanded);
   }
 
+  function updateHeaderOffset() {
+    const headerHeight = appHeader?.offsetHeight || 0;
+    document.documentElement.style.setProperty('--app-header-offset', `${headerHeight}px`);
+  }
+
   function syncResponsiveUi() {
+    updateHeaderOffset();
+
     if (window.innerWidth <= 768) {
       setMobileSheetExpanded(false);
       setLegendExpanded(false);
@@ -953,6 +961,13 @@
       syncResponsiveUi();
       map.invalidateSize();
     });
+
+    if (window.ResizeObserver && appHeader) {
+      const headerObserver = new ResizeObserver(() => {
+        updateHeaderOffset();
+      });
+      headerObserver.observe(appHeader);
+    }
   }
 
   // ── Launch ─────────────────────────────
