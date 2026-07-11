@@ -4,6 +4,8 @@
 (function () {
   'use strict';
 
+  const BUILD_ID = '2026-07-11-fcd1280-2';
+
   const DEFAULT_TYPE = '必比登美食';
 
   // ── State ──────────────────────────────
@@ -54,6 +56,7 @@
   function init() {
     restaurants = normalizeRestaurants(RESTAURANTS);
     filterOptions = buildFilterOptions(restaurants);
+    ensureBuildBadge();
     initMap();
     renderPills();
     renderFilterControls();
@@ -262,6 +265,22 @@
   function updateHeaderOffset() {
     const headerHeight = appHeader?.offsetHeight || 0;
     document.documentElement.style.setProperty('--app-header-offset', `${headerHeight}px`);
+  }
+
+  function ensureBuildBadge() {
+    const resultsInfo = document.querySelector('.results-info');
+    if (!resultsInfo) return;
+
+    let badge = document.getElementById('build-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'build-badge';
+      badge.className = 'build-badge';
+      resultsInfo.appendChild(badge);
+    }
+
+    badge.textContent = `v ${BUILD_ID}`;
+    badge.title = `Build ${BUILD_ID}`;
   }
 
   function syncResponsiveUi() {

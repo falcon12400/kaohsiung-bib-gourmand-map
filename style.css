@@ -283,6 +283,10 @@ body {
 }
 
 .results-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   font-size: 0.78rem;
   color: var(--text-muted);
   font-weight: 500;
@@ -291,6 +295,21 @@ body {
 #results-count {
   color: var(--accent-gold);
   font-weight: 700;
+}
+
+.build-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 /* --- Restaurant List --- */
@@ -1403,6 +1422,19 @@ body {
 
   .sidebar-body {
     transition: opacity var(--transition-fast);
+  }
+
+  .results-info {
+    font-size: 0.74rem;
+  }
+
+  .build-badge {
+    font-size: 0.58rem;
+    padding: 2px 7px;
+  }
+
+  .restaurant-list {
+    padding: 12px 12px max(4px, env(safe-area-inset-bottom));
   }
 
   #search-input {
