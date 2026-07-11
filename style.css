@@ -189,6 +189,8 @@ body {
 #app-main {
   display: flex;
   height: calc(100vh - var(--header-height));
+  position: relative;
+  overflow: hidden;
   margin-top: var(--header-height);
 }
 
@@ -1287,6 +1289,8 @@ body {
 @media (max-width: 768px) {
   :root {
     --header-height: auto;
+    --mobile-sheet-collapsed-height: 42px;
+    --mobile-sheet-top-gap: 10px;
   }
 
   #app-header {
@@ -1336,6 +1340,7 @@ body {
   #app-main {
     flex-direction: column;
     height: calc(100vh - 110px);
+    height: calc(100dvh - 110px);
     margin-top: 110px;
   }
 
@@ -1346,8 +1351,9 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    max-height: 78vh;
-    min-height: 84px;
+    top: auto;
+    max-height: none;
+    min-height: var(--mobile-sheet-collapsed-height);
     order: 2;
     border-right: none;
     border-top: 1px solid var(--border-color);
@@ -1368,11 +1374,13 @@ body {
   }
 
   #sidebar.sheet-collapsed {
-    height: 42px;
+    top: auto;
+    height: var(--mobile-sheet-collapsed-height);
   }
 
   #sidebar.sheet-expanded {
-    height: min(78vh, calc(100vh - 136px));
+    top: var(--mobile-sheet-top-gap);
+    height: calc(100% - var(--mobile-sheet-top-gap));
   }
 
   #sidebar.sheet-collapsed .sidebar-header,
@@ -1536,5 +1544,10 @@ body {
 @media (max-width: 768px) {
   .sidebar-toggle {
     display: flex;
+    position: sticky;
+    top: 0;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, rgba(22, 22, 29, 0.98), rgba(22, 22, 29, 0.9));
+    border-bottom: 1px solid var(--border-color);
   }
 }
