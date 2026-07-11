@@ -412,58 +412,106 @@
 
     countEl.textContent = restaurants.length;
 
-    // Group entries by category
-    const categoryOrder = getOrderedCategories(restaurants);
-    const grouped = {};
-    categoryOrder.forEach(cat => { grouped[cat] = []; });
-    restaurants.forEach(r => {
-      if (!grouped[r.category]) grouped[r.category] = [];
-      grouped[r.category].push(r);
+    const groupedByType = new Map();
+    restaurants.forEach(item => {
+      if (!groupedByType.has(item.type)) {
+        groupedByType.set(item.type, new Map());
+      }
+
+      const typeGroup = groupedByType.get(item.type);
+      if (!typeGroup.has(item.category)) {
+        typeGroup.set(item.category, []);
+      }
+
+      typeGroup.get(item.category).push(item);
     });
+
+    const orderedTypes = TYPE_ORDER
+      .filter(type => groupedByType.has(type))
+      .concat(
+        Array.from(groupedByType.keys())
+          .filter(type => !TYPE_ORDER.includes(type))
+          .sort((a, b) => a.localeCompare(b, 'zh-Hant'))
+      );
 
     let html = '';
     let cardIndex = 0;
 
-    categoryOrder.forEach(cat => {
-      const items = grouped[cat];
-      if (!items || items.length === 0) return;
-
-      const isCollapsed = groupCollapsedState[cat] === true;
-      const color = CATEGORY_COLORS[cat] || '#888';
-      const emoji = CATEGORY_ICONS[cat] || '📍';
+    orderedTypes.forEach(type => {
+      const typeKey = `type:${type}`;
+      const isTypeCollapsed = groupCollapsedState[typeKey] === true;
+      const typeCategories = groupedByType.get(type);
+      const typeCategoryOrder = (CATEGORY_ORDER[type] || [])
+        .filter(category => typeCategories.has(category))
+        .concat(
+          Array.from(typeCategories.keys())
+            .filter(category => !(CATEGORY_ORDER[type] || []).includes(category))
+            .sort((a, b) => a.localeCompare(b, 'zh-Hant'))
+        );
+      const typeCount = Array.from(typeCategories.values()).reduce((sum, items) => sum + items.length, 0);
 
       html += `
-        <div class="group-section" data-group="${cat}">
-          <div class="group-header${isCollapsed ? ' collapsed' : ''}" data-group="${cat}">
-            <div class="group-header-left">
-              <span class="group-color-dot" style="background: ${color};"></span>
-              <span class="group-emoji">${emoji}</span>
-              <span class="group-title">${cat}</span>
-              <span class="group-count">${items.length}</span>
+        <div class="type-section" data-type="${type}">
+          <div class="type-header${isTypeCollapsed ? ' collapsed' : ''}" data-type="${type}">
+            <div class="type-header-left">
+              <span class="type-emoji">${TYPE_CONFIG[type]?.emoji || '📂'}</span>
+              <span class="type-title">${type}</span>
+              <span class="type-count">${typeCount}</span>
             </div>
-            <svg class="group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <svg class="type-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="6 9 12 15 18 9"/>
             </svg>
           </div>
-          <div class="group-body${isCollapsed ? ' collapsed' : ''}">
+          <div class="type-body${isTypeCollapsed ? ' collapsed' : ''}">
       `;
 
-      items.forEach(r => {
+      typeCategoryOrder.forEach(cat => {
+        const items = typeCategories.get(cat);
+        if (!items || items.length === 0) return;
+
+        const groupKey = `category:${type}:${cat}`;
+        const isCollapsed = groupCollapsedState[groupKey] === true;
+        const color = CATEGORY_COLORS[cat] || '#888';
+        const emoji = CATEGORY_ICONS[cat] || '📍';
+
         html += `
-            <div class="restaurant-card" data-id="${r.id}" data-category="${r.category}" style="animation-delay: ${cardIndex * 0.03}s">
-              <div class="card-top">
-                <span class="card-name">${r.name}</span>
-                ${r.isNew ? '<span class="card-badge-new">✦ NEW</span>' : ''}
+          <div class="group-section" data-group="${groupKey}">
+            <div class="group-header${isCollapsed ? ' collapsed' : ''}" data-group="${groupKey}">
+              <div class="group-header-left">
+                <span class="group-color-dot" style="background: ${color};"></span>
+                <span class="group-emoji">${emoji}</span>
+                <span class="group-title">${cat}</span>
+                <span class="group-count">${items.length}</span>
               </div>
-              <div class="card-address">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span>${r.address}</span>
-              </div>
+              <svg class="group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
             </div>
+            <div class="group-body${isCollapsed ? ' collapsed' : ''}">
         `;
-        cardIndex++;
+
+        items.forEach(r => {
+          html += `
+              <div class="restaurant-card" data-id="${r.id}" data-category="${r.category}" style="animation-delay: ${cardIndex * 0.03}s">
+                <div class="card-top">
+                  <span class="card-name">${r.name}</span>
+                  ${r.isNew ? '<span class="card-badge-new">✦ NEW</span>' : ''}
+                </div>
+                <div class="card-address">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span>${r.address}</span>
+                </div>
+              </div>
+          `;
+          cardIndex++;
+        });
+
+        html += `
+            </div>
+          </div>
+        `;
       });
 
       html += `
@@ -474,11 +522,18 @@
 
     listEl.innerHTML = html;
 
+    listEl.querySelectorAll('.type-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const type = header.dataset.type;
+        toggleTypeGroup(type);
+      });
+    });
+
     // Bind group header clicks
     listEl.querySelectorAll('.group-header').forEach(header => {
       header.addEventListener('click', () => {
-        const cat = header.dataset.group;
-        toggleGroup(cat);
+        const groupKey = header.dataset.group;
+        toggleGroup(groupKey);
       });
     });
 
@@ -502,6 +557,24 @@
     const body = section.querySelector('.group-body');
 
     if (groupCollapsedState[category]) {
+      header.classList.add('collapsed');
+      body.classList.add('collapsed');
+    } else {
+      header.classList.remove('collapsed');
+      body.classList.remove('collapsed');
+    }
+  }
+
+  function toggleTypeGroup(type) {
+    const typeKey = `type:${type}`;
+    groupCollapsedState[typeKey] = !groupCollapsedState[typeKey];
+    const section = listEl.querySelector(`.type-section[data-type="${type}"]`);
+    if (!section) return;
+
+    const header = section.querySelector('.type-header');
+    const body = section.querySelector('.type-body');
+
+    if (groupCollapsedState[typeKey]) {
       header.classList.add('collapsed');
       body.classList.add('collapsed');
     } else {
