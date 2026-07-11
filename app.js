@@ -13,6 +13,7 @@
   let activeRestaurantId = null;
   let activeSidebarTab = 'list';
   let markerGroup;
+  let userLocationMarker = null;
   let restaurants = [];
   let filterOptions = [];
   const hiddenFacets = new Set();
@@ -24,6 +25,8 @@
   const countEl = document.getElementById('results-count');
   const pillsEl = document.getElementById('filter-pills');
   const mapLegendEl = document.getElementById('map-legend');
+  const locateMeBtn = document.getElementById('locate-me-btn');
+  const mapStatusBanner = document.getElementById('map-status-banner');
   const sidebarTabsEl = document.getElementById('sidebar-tabs');
   const sidebarPanelList = document.getElementById('sidebar-panel-list');
   const sidebarPanelFilters = document.getElementById('sidebar-panel-filters');
@@ -261,6 +264,95 @@
       iconAnchor: [18, 36],
       popupAnchor: [0, -38]
     });
+  }
+
+  function createUserLocationIcon() {
+    return L.divIcon({
+      html: `
+        <div class="custom-marker cat-目前位置">
+          <span class="marker-emoji">📍</span>
+        </div>
+      `,
+      className: 'custom-marker-wrapper',
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -38]
+    });
+  }
+
+  function setStatusMessage(message, { isError = false } = {}) {
+    if (!message) {
+      mapStatusBanner.hidden = true;
+      mapStatusBanner.textContent = '';
+      mapStatusBanner.classList.remove('is-error');
+      return;
+    }
+
+    mapStatusBanner.hidden = false;
+    mapStatusBanner.textContent = message;
+    mapStatusBanner.classList.toggle('is-error', isError);
+  }
+
+  function getGeolocationErrorMessage(error) {
+    if (!error) return '無法取得目前位置。';
+
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        return '定位權限被拒絕，請允許瀏覽器存取位置資訊。';
+      case error.POSITION_UNAVAILABLE:
+        return '目前無法判斷裝置位置，請確認 GPS 或網路訊號。';
+      case error.TIMEOUT:
+        return '定位逾時，請稍後再試一次。';
+      default:
+        return '定位失敗，請稍後再試一次。';
+    }
+  }
+
+  function updateUserLocation(lat, lng) {
+    const latLng = [lat, lng];
+
+    if (!userLocationMarker) {
+      userLocationMarker = L.marker(latLng, { icon: createUserLocationIcon() }).addTo(map);
+      userLocationMarker.bindPopup(`
+        <div class="popup-content">
+          <div class="popup-name">你的位置</div>
+          <div class="popup-desc">目前裝置定位結果</div>
+        </div>
+      `);
+    } else {
+      userLocationMarker.setLatLng(latLng);
+    }
+
+    map.flyTo(latLng, 14, { duration: 0.8 });
+    userLocationMarker.openPopup();
+  }
+
+  function locateUser() {
+    if (!navigator.geolocation) {
+      setStatusMessage('這個瀏覽器不支援定位功能。', { isError: true });
+      return;
+    }
+
+    locateMeBtn.disabled = true;
+    setStatusMessage('正在取得目前位置...');
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude, accuracy } = position.coords;
+        updateUserLocation(latitude, longitude);
+        locateMeBtn.disabled = false;
+        setStatusMessage(`已定位，目前誤差約 ${Math.round(accuracy)} 公尺。`);
+      },
+      error => {
+        locateMeBtn.disabled = false;
+        setStatusMessage(getGeolocationErrorMessage(error), { isError: true });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      }
+    );
   }
 
   // ── Render Markers ─────────────────────
@@ -646,6 +738,7 @@
     showAllBtn.addEventListener('click', showAllFacets);
     hideAllBtn.addEventListener('click', hideAllFacets);
     showBibBtn.addEventListener('click', () => showOnlyType('必比登美食'));
+    locateMeBtn.addEventListener('click', locateUser);
 
     // Search
     let searchTimeout;

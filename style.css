@@ -658,6 +658,67 @@ body {
   height: 100%;
 }
 
+.locate-me-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 850;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+  font-family: var(--font-sans);
+}
+
+.locate-me-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+.locate-me-btn:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+
+.locate-me-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.map-status-banner {
+  position: absolute;
+  top: 68px;
+  right: 16px;
+  z-index: 845;
+  max-width: 320px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  box-shadow: var(--shadow-md);
+}
+
+.map-status-banner.is-error {
+  border-color: rgba(231, 76, 60, 0.45);
+  color: #ffb3ac;
+}
+
 /* Custom Leaflet marker styling */
 .custom-marker {
   display: flex;
@@ -679,6 +740,7 @@ body {
 .custom-marker.cat-室內景點 { background: var(--accent-blue); }
 .custom-marker.cat-親子景點 { background: #9b59b6; }
 .custom-marker.cat-山林部落 { background: #16a085; }
+.custom-marker.cat-目前位置 { background: var(--accent-blue); }
 
 .custom-marker .marker-emoji {
   transform: rotate(45deg);
@@ -1184,6 +1246,20 @@ body {
     bottom: 12px;
     right: 8px;
     padding: 10px 14px;
+  }
+
+  .locate-me-btn {
+    top: 12px;
+    right: 8px;
+    padding: 9px 12px;
+    font-size: 0.76rem;
+  }
+
+  .map-status-banner {
+    top: 58px;
+    right: 8px;
+    left: 8px;
+    max-width: none;
   }
 
   .legend-title { font-size: 0.66rem; }
